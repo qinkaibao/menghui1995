@@ -15,5 +15,6 @@
     "manifests/part-10.json",
     "manifests/part-11.json",
     "manifests/part-12.json"
-  ]
+  ],
+  "revision": 2
 }

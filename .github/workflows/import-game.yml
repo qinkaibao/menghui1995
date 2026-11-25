@@ -1,0 +1,22 @@
+name: Import game v19
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'import-manifest.json'
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import verified public game assets
+        run: python3 scripts/import_game.py
+      - name: Commit standalone game
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs
+          git diff --cached --quiet || git commit -m 'Import complete game v19'
+          git push origin HEAD:main

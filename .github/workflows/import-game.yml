@@ -1,4 +1,4 @@
-name: Import game v19
+name: Import and publish game v19
 on:
   workflow_dispatch:
   push:
@@ -20,3 +20,23 @@ jobs:
           git add docs
           git diff --cached --quiet || git commit -m 'Import complete game v19'
           git push origin HEAD:main
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+  deploy:
+    needs: import
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Publish GitHub Pages
+        uses: actions/deploy-pages@v4
+        id: deployment

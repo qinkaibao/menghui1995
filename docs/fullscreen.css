@@ -1,0 +1,56 @@
+/* Immersive, tap-first game mode. Art keeps its original aspect ratio. */
+html,body{background:#34261a;}
+#app{position:fixed;inset:0;top:0;width:100vw;height:100svh;height:100dvh;max-width:none;max-height:none;margin:0;transform:none;overflow:hidden;}
+.world{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;touch-action:none;}
+.world-stage{position:absolute;inset:0 auto auto 0;transform:translate3d(0,0,0);width:100%;height:100%;will-change:transform;isolation:isolate;}
+.world:before{z-index:2;}
+.world-stage .scene{width:100%;height:100%;object-fit:fill;}
+.world-stage .hotspot{font-size:clamp(12px,1.3vw,18px);min-height:34px;line-height:1.25;}
+.dpad,.action,.portrait-message{display:none!important;}
+.hud{padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left));}
+.brand{padding:.5em .7em;}
+.brand strong{font-size:clamp(24px,3.4vw,48px);}
+.brand small{font-size:clamp(11px,1.25vw,18px);}
+.location{top:clamp(64px,7.5vw,110px);left:max(12px,env(safe-area-inset-left));}
+.rightHUD{max-width:78%;}
+.actionHUD{position:static;display:flex;gap:5px;}
+.guide{position:absolute;top:auto;bottom:calc(78px + env(safe-area-inset-bottom));left:50%;width:min(76%,760px);transform:translateX(-50%);gap:5px;}
+.quest{font-size:clamp(13px,1.4vw,20px);padding:.55em .9em;line-height:1.25;}
+.keyguide{font-size:12px;color:#fff3d4;background:#312016b8;white-space:nowrap;padding:5px 10px;}
+.quick-tray{position:absolute;z-index:8;bottom:0;left:0;right:0;display:flex;align-items:center;gap:9px;padding:10px max(12px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:linear-gradient(0deg,#362619ec,#392719ac 70%,#3c291517);color:#fff0ce;pointer-events:none;}
+.quick-label{font:700 13px/1.2 system-ui;white-space:nowrap;flex:none;padding-left:3px;text-shadow:0 1px 3px #2a1b13;}
+.quickspots{display:flex;align-items:center;gap:7px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-x;min-width:0;flex:1;pointer-events:auto;padding:4px 0;}
+.quickspots::-webkit-scrollbar{display:none;}
+.quickspot{flex:none;min-height:42px;white-space:nowrap;padding:7px 13px;border-radius:7px;border:1px solid #f0cc8fa6;background:#5b3d24d6;color:#fff0cb;box-shadow:0 1px 4px #24170d50;font:700 clamp(12px,1.2vw,16px)/1.1 system-ui;touch-action:manipulation;}
+.quickspot:active,.quickspot:hover{background:#956b38;}
+.quickspot.offscreen{border-color:#d7b678;}
+.quickspot.done{color:#e4eebc;}
+.quickspot.active{background:#a9773f;border-color:#fff1a9;}
+.quickspot.route{outline:2px solid #ecc674;}
+.fullscreen-btn[hidden]{display:none}
+.modal-backdrop{position:absolute;inset:0;}
+.toast{top:20%;}
+@media (pointer:coarse){.world-stage .hotspot{min-height:39px;padding:9px 13px;}.quickspot{min-height:44px;}}
+@media(max-aspect-ratio:4/5){
+ #app{height:100svh;height:100dvh;}
+ .hud{padding:max(8px,env(safe-area-inset-top)) 8px 0;gap:6px;}
+ .brand{padding:7px 9px;}
+ .brand strong{font-size:21px;}
+ .brand small{font-size:10px;}
+ .rightHUD{max-width:66%;gap:3px;}
+ .statusHUD{gap:4px;}
+ .statusHUD .tag{font-size:11px;padding:7px 5px;}
+ .actionHUD{position:absolute;top:calc(max(8px,env(safe-area-inset-top)) + 51px);left:8px;right:8px;display:flex;flex-wrap:nowrap;justify-content:flex-end;gap:4px;}
+ .actionHUD .tag{min-height:33px;padding:7px 6px;font-size:11px;flex:0 1 auto;white-space:nowrap;}
+ .location{top:calc(max(8px,env(safe-area-inset-top)) + 92px);left:8px;font-size:12px;}
+ .world-stage .hotspot{font-size:14px;min-height:36px;padding:8px 11px;}
+ .guide{top:auto;bottom:calc(85px + env(safe-area-inset-bottom));width:94%;gap:5px;}
+ .quest{font-size:17px;padding:9px 14px;line-height:1.28;max-width:100%;}
+ .keyguide{font-size:11px;padding:5px 8px;}
+ .quick-tray{flex-direction:column;align-items:stretch;gap:3px;padding:3px 8px calc(8px + env(safe-area-inset-bottom));}
+ .quick-label{font-size:11px;opacity:.95;}
+ .quickspots{padding:4px 0;gap:6px;}
+ .quickspot{font-size:13px;min-height:43px;padding:9px 11px;}
+ .toast{top:26%;}
+}
+@media(max-height:460px) and (min-aspect-ratio:4/5){.brand strong{font-size:25px}.brand small{font-size:11px}.brand{padding:5px 8px}.location{top:56px}.guide{bottom:calc(58px + env(safe-area-inset-bottom));width:64%}.quest{font-size:13px;padding:6px 9px}.keyguide{display:none}.quick-tray{padding-top:4px;padding-bottom:calc(4px + env(safe-area-inset-bottom));gap:5px}.quickspot{min-height:35px;padding:6px 9px;font-size:12px}.quick-label{font-size:11px}.tag{font-size:11px;padding:6px 7px}.world-stage .hotspot{min-height:29px;padding:5px 9px;font-size:12px}.hud{padding-top:max(5px,env(safe-area-inset-top))}}

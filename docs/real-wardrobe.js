@@ -1,0 +1,38 @@
+'use strict';
+// Every avatar is a real painted raster portrait over interchangeable clothing.
+// The same head asset is used for each outfit, direction and walking frame.
+window.Wardrobe=(()=>{
+  const A=window.RealWardrobeAssets;
+  const characters=[['boy','小男孩'],['girl','小女孩'],['candy','糖果 Candy']];
+  const hairColors=[['black','自然黑',null],['chestnut','板栗棕','#68452f'],['coffee','咖啡色','#4c392e'],['honey','浅蜜棕','#a77a4f'],['gold','金棕','#b29864'],['auburn','红棕','#8e4b39'],['silver','银灰','#9c9992'],['blue','深蓝灰','#4d5d71'],['pink','玫瑰棕','#a36a72'],['purple','葡萄灰','#76627c']];
+  const shoes=[['cloth','原配布鞋',null],['white','奶白布鞋','#ded2b6'],['red','红色布鞋','#a45447'],['blue','蓝色布鞋','#4a7186'],['boots','深绿布鞋','#666d4c'],['sandals','棕色布鞋','#8e6950']];
+  const hairNames={short:'自然短发',part:'侧分短发',crop:'清爽短发',mushroom:'蘑菇头',wave:'蓬松卷发',double:'双马尾',long:'披肩长发',bob:'齐耳短发',pony:'高马尾',braid:'双麻花辫',fringe:'齐刘海长发'};
+  const hairDefault={boy:'short',girl:'double',candy:'long'};
+  const shirt=[['classic','原版童年装','shirt',null,null],['vest','米色棉衫','#','cream'],['sailor','蓝色棉衫','shirt','#7796ae','#35495f'],['red','米白校服','shirt','#e5dfca','#4d637c'],['green','青绿棉衫','shirt','#7f9870','#6b6a50'],['yellow','鹅黄棉衫','shirt','#d5ac64','#827355'],['redcheck','砖红棉衫','shirt','#b66958','#534e46'],['bluecheck','灰蓝棉衫','shirt','#7b858f','#68533e']];
+  const denim=[['denim','蓝色牛仔背带裤','denim',null,null],['overalls','深绿背带裤','denim','#dfd4b7','#63745a'],['denimBrown','棕色背带裤','denim','#e6d4ba','#94745a'],['denimBlack','深灰背带裤','denim','#e4c9aa','#484a48'],['denimLight','浅蓝背带裤','denim','#e2d7be','#7592a4'],['denimRed','赭红背带裤','denim','#e0c1ac','#926059']];
+  const knit=[['sweater','砖红针织衫','knit',null,null],['jacket','藏蓝针织衫','knit','#4f657b','#847a64'],['cotton','莓红针织衫','knit','#ad6d74','#6f6570'],['winter','栗棕针织衫','knit','#8f6e58','#545a63'],['knitGreen','墨绿针织衫','knit','#64735b','#85765b'],['knitCream','米白针织衫','knit','#d5c7aa','#776754'],['knitGold','秋黄针织衫','knit','#bc9857','#756b54']];
+  const dress=[['flower','红色碎花连衣裙','dress',null,null],['pink','粉色碎花裙','dress','#cc9a9e',null],['sky','蓝色碎花裙','dress','#7596aa',null],['yellowdress','向日葵碎花裙','dress','#d1ae63',null],['dressGreen','青绿碎花裙','dress','#8c9c72',null],['dressPurple','淡紫碎花裙','dress','#a58ba3',null],['dressCream','奶白碎花裙','dress','#d8c2a2',null]];
+  const candyJacket=[['classic','糖果的原版外套','jacket',null,null],['rain','浅绿休闲外套','jacket','#88a184','#7c8ea0'],['bluecheck','蓝灰休闲外套','jacket','#7694ae','#63758b'],['cottonJacket','浅粉休闲外套','jacket','#c99aa1','#8ea1ab'],['yellow','暖黄休闲外套','jacket','#c7ad72','#738aa0'],['sandJacket','米色休闲外套','jacket','#d5c6a7','#747c86']];
+  const outfits={boy:shirt.map(x=>x[0]==='vest'?['vest','浅米色棉衫','shirt','#d7c6a4','#586d82']:x).concat(denim,knit),girl:[['classic','原版粉色童年装','legacy',null,null]].concat(dress,denim,knit),candy:candyJacket.concat(dress,denim,knit)};
+  const DEFAULT={gender:'boy',hair:'short',hairColor:'black',outfit:'classic',shoes:'cloth'};
+  const validPerson=p=>characters.some(r=>r[0]===p)?p:'boy';
+  function optionsFor(p){p=validPerson(p);return{outfit:outfits[p],hair:Object.keys(A[p].head).map(k=>[k,hairNames[k]||k]),hairColor:hairColors,shoes}}
+  function normal(v={}){v=v&&typeof v==='object'?v:{};const gender=validPerson(v.gender),a={...DEFAULT,gender,hair:hairDefault[gender]};for(const [k,rows] of Object.entries(optionsFor(gender)))if(rows.some(r=>r[0]===v[k]))a[k]=v[k];return a}
+  const find=(list,key)=>list.find(x=>x[0]===key)||list[0];
+  const name=a=>find(outfits[normal(a).gender],normal(a).outfit)[1];
+  const characterName=a=>find(characters,normal(a).gender)[1];
+  // The original game's two painted strides, not a stretched standing pose.
+  function walkFrame(seconds){return 1+Math.floor(Math.max(0,seconds)*4.5)%2}
+  const cache=new Map(),pending=new Map(),sourceCache=new Map(),requests=new WeakMap();
+  const keyFor=(a,dir,frame)=>Object.values(a).join('|')+'|'+dir+frame;
+  const common=(a,dir,frame)=>A.packed?.[a.gender]?.[a.outfit]?.[dir]?.[frame]||A[a.gender].body[find(outfits[a.gender],a.outfit)[2]][dir].full;
+  const custom=a=>a.hair!==hairDefault[a.gender]||a.hairColor!=='black'||a.shoes!=='cloth';
+  function sprite(v,dir='down',frame=0){const a=normal(v);if(!['down','up','left','right'].includes(dir))dir='down';frame=frame===1?1:frame===2?2:0;return cache.get(keyFor(a,dir,frame))||common(a,dir,frame)}
+  function loadImage(url){if(!url)return Promise.resolve(null);if(sourceCache.has(url))return sourceCache.get(url);const p=new Promise((resolve,reject)=>{const im=new Image();let t=setTimeout(()=>{im.onload=im.onerror=null;reject(Error('sprite timeout'))},8000);im.onload=()=>{clearTimeout(t);resolve(im)};im.onerror=()=>{clearTimeout(t);reject(Error('sprite missing'))};im.src=url});sourceCache.set(url,p);p.catch(()=>sourceCache.delete(url));while(sourceCache.size>80)sourceCache.delete(sourceCache.keys().next().value);return p}
+  // Color only the existing painted mask, then rasterize each selected frame once.
+  function tint(ctx,im,color,x=0){if(!im)return;if(!color){ctx.drawImage(im,x,0);return}const cv=document.createElement('canvas');cv.width=240;cv.height=344;const c=cv.getContext('2d',{willReadFrequently:true});c.drawImage(im,0,0);const d=c.getImageData(0,0,240,344),a=d.data,r=parseInt(color.slice(1,3),16)-89.25,g=parseInt(color.slice(3,5),16)-89.25,b=parseInt(color.slice(5,7),16)-89.25;for(let i=0;i<a.length;i+=4){const l=.7*(.299*a[i]+.587*a[i+1]+.114*a[i+2]);a[i]=l+r;a[i+1]=l+g;a[i+2]=l+b}c.putImageData(d,0,0);ctx.drawImage(cv,x,0)}
+  function compose(a,dir,frame){const key=keyFor(a,dir,frame);if(!custom(a))return Promise.resolve(common(a,dir,frame));if(cache.has(key))return Promise.resolve(cache.get(key));if(pending.has(key))return pending.get(key);const d=A[a.gender],o=find(outfits[a.gender],a.outfit),still=d.body[o[2]][dir],b=(frame&&still.walk?.[frame-1])||still,head=d.head[a.hair][dir],painted=a.hair===hairDefault[a.gender],hair=find(hairColors,a.hairColor)[2],shoe=find(shoes,a.shoes)[2];const layers=painted?[[common(a,dir,frame),null,0],[hair?b.hair:null,hair,0],[shoe?b.masks.shoes:null,shoe,0]]:[[b.base,null,0],[o[3]?b.masks.top:null,o[3],0],[o[4]?b.masks.bottom:null,o[4],0],[shoe?b.masks.shoes:null,shoe,0],[head.base,null,b.headShift||0],[hair?head.hair:null,hair,b.headShift||0]];const job=Promise.all(layers.map(([url])=>loadImage(url))).then(images=>{const cv=document.createElement('canvas');cv.width=240;cv.height=344;const ctx=cv.getContext('2d');images.forEach((im,i)=>tint(ctx,im,layers[i][1],layers[i][2]));const uri=cv.toDataURL('image/webp',.88);cache.set(key,uri);while(cache.size>72)cache.delete(cache.keys().next().value);return uri}).catch(()=>common(a,dir,frame)).finally(()=>pending.delete(key));pending.set(key,job);return job}
+  function paint(node,v,dir='down',frame=0){if(!node)return;const a=normal(v),key=keyFor(a,dir,frame);requests.set(node,key);const fallback=sprite(a,dir,frame);if(node.getAttribute('src')!==fallback)node.src=fallback;if(custom(a)&&!cache.has(key))compose(a,dir,frame).then(url=>{if(requests.get(node)===key&&node.isConnected&&node.getAttribute('src')!==url)node.src=url});}
+  let warmKey='';function preload(v){const a=normal(v),key=Object.values(a).join('|');if(warmKey===key)return;warmKey=key;const frames=['down','left','right','up'].flatMap(dir=>[0,1,2].map(f=>[dir,f]));let i=0;const next=()=>{if(warmKey!==key||i>=frames.length)return;const [dir,f]=frames[i++];(custom(a)?compose(a,dir,f):loadImage(common(a,dir,f))).catch(()=>{}).finally(()=>setTimeout(next,30))};next();}
+  return {normal,DEFAULT,characters,optionsFor,sprite,name,characterName,preload,paint,readySprite:sprite,walkFrame};
+})();

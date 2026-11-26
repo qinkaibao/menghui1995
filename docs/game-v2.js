@@ -283,7 +283,7 @@ document.addEventListener('fullscreenchange',()=>{resizePlayArea();if(!document.
 window.addEventListener('resize',fitStage);if(window.ResizeObserver)new ResizeObserver(fitStage).observe($('world'));
 $('overlay').addEventListener('pointerdown',e=>{if(e.target===$('overlay'))closeModal()});
 let lastStepError=0,lastStepTime=0;
-function update(t){try{if(t-lastStepTime>=26){lastStepTime=t;gameStep(t)}}catch(e){console.error('Game step recovered:',e);if(t-lastStepError>1500||!lastStepError){lastStepError=t;try{recoverTravel('游戏刚刚恢复了操作，进度已保留。')}catch(err){console.warn(err)}}}finally{requestAnimationFrame(update)}}
+function update(t){try{if(t-lastStepTime>=26){lastStepTime=t;gameStep(t);window.Multiplayer?.tick(t)}}catch(e){console.error('Game step recovered:',e);if(t-lastStepError>1500||!lastStepError){lastStepError=t;try{recoverTravel('游戏刚刚恢复了操作，进度已保留。')}catch(err){console.warn(err)}}}finally{requestAnimationFrame(update)}}
 function gameStep(t){const dt=Math.min(.10,Math.max(0,(t-last)/1000));last=t;if(menuOpen||sleeping||arcadeActive()){return}rainTick(dt);if(crossing){advanceCrossing(dt);return}clockAcc+=dt;if(clockAcc>=4.5){clockAcc-=4.5;advance(1)}let moving=false;
   if(!modalType){const held=activeDirs();let dx=(held.has('right')?1:0)-(held.has('left')?1:0)+joy.x,dy=(held.has('down')?1:0)-(held.has('up')?1:0)+joy.y;const speed=expState().upgrades.bike&&OUTSIDE.has(S.scene)?.44:.295;
     if(!dx&&!dy&&target){const tx=target.x-S.x,ty=target.y-S.y,dist=Math.hypot(tx,ty*1.35);if(dist<Math.max(.002,speed*dt+.001)){S.dir=walkDirection(tx,ty*1.35,S.dir);S.x=target.x;S.y=target.y;const id=arrive;target=null;arrive=null;hideTarget();if(id)act(id);if(crossing)return}else{dx=tx/dist;dy=ty/dist*1.35}}
